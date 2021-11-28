@@ -79,6 +79,7 @@ def migros(update, context):
 
             for res_url in page_list:
                 msg.edit_text("Requesting... {}".format(res_url))
+                print("Requesting... {}".format(res_url))
                 res = requests.get(res_url)
                 market_json = json.loads(res.content)
                 jsonpath_expression = parse('data[*].searchInfo[*].storeProductInfos[*]')
