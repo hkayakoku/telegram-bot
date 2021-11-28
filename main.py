@@ -124,7 +124,7 @@ def migros(update, context):
 
             for res_url in page_list:
                 msg.edit_text("Requesting... {}".format(res_url))
-                print("Requesting... {}".format(res_url))
+                # print("Requesting... {}".format(res_url))
                 res = requests.get(res_url)
                 market_json = json.loads(res.content)
                 jsonpath_expression = parse('data[*].searchInfo[*].storeProductInfos[*]')
@@ -154,7 +154,8 @@ def migros(update, context):
                             if ret is not None and 'PriceDict' in ret:
                                 if today_str in ret['PriceDict']:
                                     if ret['PriceDict'][today_str]['sale_price'] != price.sale_price:
-                                        print("Today's Price Changed in {} from {} to {}".format(p_dict["prettyName"],
+                                        update.message.reply_text("Today's Price Changed in {} from {} to {}".format
+                                                                  (p_dict["prettyName"],
                                                                                                  price.sale_price,
                                                                                                  ret['PriceDict'][today_str][
                                                                                                      'sale_price']))
@@ -208,6 +209,6 @@ disp.add_handler(telegram.ext.CommandHandler("help", help))
 disp.add_handler(telegram.ext.CommandHandler("doviz", doviz))
 disp.add_handler(telegram.ext.CommandHandler("migros", migros))
 disp.add_handler(telegram.ext.CommandHandler("discount", discount))
-print("BOT started")
+# print("BOT started")
 updater.start_polling()
 updater.idle()
