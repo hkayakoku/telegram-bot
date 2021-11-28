@@ -128,8 +128,9 @@ def migros(update, context):
                                 product_info_list.append(p.__dict__)
 
         x = col.insert_many(product_info_list)
+        msg = update.message.reply_text("Completed")
     except Exception as e:
-        msg = update.message.reply_text("HATA: {}".format(e.message))
+        msg = update.message.reply_text("HATA: {}".format(str(e)))
 
 def doviz(update, context):
     update.message.reply_text("Alınıyor... İşbank")
