@@ -18,6 +18,51 @@ def start(update, context):
 def help(update, context):
     update.message.reply_text("help message")
 
+def discount(update, context):
+    update.message.reply_text("Getiriliyor")
+    client = MongoClient('mongodb+srv://hkayakoku:{}@cluster0.rn62h.mongodb.net/test'.format(MONGO))
+    db = client['migros-product']
+    col = db['migros']
+
+    dt = datetime.datetime.now()
+    today_str = "{}-{}-{}".format(dt.year, dt.month, dt.day)
+
+    dt = datetime.datetime.now() - datetime.timedelta(days=1)
+    yesterday_str = "{}-{}-{}".format(dt.year, dt.month, dt.day)
+
+    # Some working Commands
+    # { $expr: { $gt : [ "$PriceDict.2021-11-22.sale_price" , "$PriceDict.2021-11-23.sale_price" ] } }
+    product = col.find({"$expr": {
+        "$gt": ["$PriceDict.{}.sale_price".format(yesterday_str), "$PriceDict.{}.sale_price".format(today_str)]}})
+
+    dis_str = ""
+    for x in product:
+        if yesterday_str in x['PriceDict'] and today_str in x['PriceDict']:
+            yesterday_price = x['PriceDict'][yesterday_str]['sale_price']
+            today_price = x['PriceDict'][today_str]['sale_price']
+            diff = today_price - yesterday_price
+            dis_str = dis_str + "\n" + ("{} - www.migros.com.tr/{} t-1 {} t {} diff: {:.2f}".format(x['category'],
+                                                                              x['_id'], yesterday_price,
+                                                                              today_price,
+                                                                              today_price - yesterday_price))
+
+    dis_str = dis_str + "\n" + "Yukselenler"
+
+    product = col.find({"$expr": {
+        "$gt": ["$PriceDict.{}.sale_price".format(today_str), "$PriceDict.{}.sale_price".format(yesterday_str)]}})
+
+    for x in product:
+        if yesterday_str in x['PriceDict'] and today_str in x['PriceDict']:
+            yesterday_price = x['PriceDict'][yesterday_str]['sale_price']
+            today_price = x['PriceDict'][today_str]['sale_price']
+            dis_str = dis_str + "\n" + ("{} - www.migros.com.tr/{} t-1 {} t {} diff: {:.2f}".format(x['category'],
+                                                                              x['_id'], yesterday_price,
+                                                                              today_price,
+                                                                              today_price - yesterday_price))
+
+    update.message.reply_text(dis_str)
+
+
 def migros(update, context):
     # Any send_* methods return the sent message object
     msg = update.message.reply_text("Başlatılıyor...")
@@ -162,6 +207,7 @@ disp.add_handler(telegram.ext.CommandHandler("start", start))
 disp.add_handler(telegram.ext.CommandHandler("help", help))
 disp.add_handler(telegram.ext.CommandHandler("doviz", doviz))
 disp.add_handler(telegram.ext.CommandHandler("migros", migros))
+disp.add_handler(telegram.ext.CommandHandler("discount", discount))
 print("BOT started")
 updater.start_polling()
 updater.idle()
